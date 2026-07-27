@@ -1,0 +1,1 @@
+{"gender": {"0": "female", "1": "male"}, "vehicle_type": {"0": "hatchback", "1": "sedan", "2": "sports", "3": "suv", "4": "truck"}, "city_type": {"0": "rural", "1": "suburban", "2": "urban"}, "anti_theft": {"0": "no", "1": "yes"}, "multi_car": {"0": "no", "1": "yes"}}

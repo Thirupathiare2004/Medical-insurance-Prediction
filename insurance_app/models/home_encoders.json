@@ -1,0 +1,1 @@
+{"location_risk": {"0": "high", "1": "low", "2": "medium"}, "construction_type": {"0": "brick", "1": "concrete", "2": "steel", "3": "wood"}, "security_system": {"0": "no", "1": "yes"}, "smoke_detectors": {"0": "no", "1": "yes"}, "flood_zone": {"0": "no", "1": "yes"}, "garage": {"0": "no", "1": "yes"}}

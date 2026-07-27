@@ -1,0 +1,1 @@
+{"gender": {"0": "female", "1": "male"}, "smoker": {"0": "no", "1": "yes"}, "occupation_risk": {"0": "high", "1": "low", "2": "medium"}, "family_history": {"0": "no", "1": "yes"}, "chronic_illness": {"0": "no", "1": "yes"}, "alcohol": {"0": "heavy", "1": "moderate", "2": "none"}, "exercise_freq": {"0": "intense", "1": "light", "2": "moderate", "3": "none"}}

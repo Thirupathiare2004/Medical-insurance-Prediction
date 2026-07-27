@@ -1,0 +1,1 @@
+{"destination_risk": {"0": "extreme", "1": "high", "2": "low", "3": "medium"}, "travel_purpose": {"0": "adventure", "1": "business", "2": "leisure", "3": "medical"}, "pre_existing_condition": {"0": "no", "1": "yes"}, "coverage_type": {"0": "basic", "1": "premium", "2": "standard"}, "flight_delay": {"0": "no", "1": "yes"}, "adventure_sports": {"0": "no", "1": "yes"}}

@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsureAI — Smart Insurance Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ──────────────────────────────────────────────────────────────── */
+:root {
+  --bg:      #09090f;
+  --surface: #111118;
+  --card:    #16161f;
+  --border:  rgba(255,255,255,0.07);
+  --txt:     #e8e8f0;
+  --muted:   #6b6b80;
+  --accent-medical: #00e5ff;
+  --accent-car:     #ff6b35;
+  --accent-home:    #7fff6e;
+  --accent-life:    #d066ff;
+  --accent-travel:  #ffd166;
+  --accent:  #00e5ff;
+  --glow:    0 0 40px rgba(0,229,255,0.15);
+  --r:       16px;
+  font-size: 15px;
+}
+
+/* ── RESET ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND GRID ─────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ─────────────────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: rgba(9,9,15,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 1.4rem;
+  background: linear-gradient(135deg, #00e5ff, #7fff6e);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.nav-badge {
+  font-size: 0.7rem; color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+}
+.nav-link {
+  font-size: 0.82rem; color: var(--muted);
+  text-decoration: none; padding: 6px 14px;
+  border-radius: 8px; transition: all 0.2s;
+  font-weight: 500;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--txt); background: rgba(255,255,255,0.06);
+}
+
+/* ── HERO ────────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 80px 2rem 60px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(0,229,255,0.2);
+  padding: 6px 16px; border-radius: 50px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 800; line-height: 1.08;
+  letter-spacing: -1.5px;
+  animation: fadeUp 0.7s ease 0.1s both;
+}
+.hero h1 span {
+  background: linear-gradient(135deg, #00e5ff 0%, #7fff6e 50%, #d066ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-sub {
+  margin-top: 16px; font-size: 1.05rem; color: var(--muted);
+  max-width: 520px; margin-inline: auto;
+  animation: fadeUp 0.7s ease 0.2s both;
+}
+
+/* ── INSURANCE TABS ──────────────────────────────────────────────────────── */
+.tabs-wrap {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto 48px;
+  padding: 0 1.5rem;
+  animation: fadeUp 0.7s ease 0.3s both;
+}
+.tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px;
+}
+.tab {
+  flex: 1; min-width: 130px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: none; background: transparent;
+  cursor: pointer; color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.tab-icon { font-size: 1.5rem; transition: transform 0.3s ease; }
+.tab-label { font-weight: 500; }
+.tab:hover { color: var(--txt); background: rgba(255,255,255,0.04); }
+.tab:hover .tab-icon { transform: scale(1.15); }
+
+.tab[data-type="medical"].active   { background: rgba(0,229,255,0.1);  color: var(--accent-medical); border: 1px solid rgba(0,229,255,0.25); }
+.tab[data-type="car"].active       { background: rgba(255,107,53,0.1); color: var(--accent-car);     border: 1px solid rgba(255,107,53,0.25);}
+.tab[data-type="home"].active      { background: rgba(127,255,110,0.1);color: var(--accent-home);    border: 1px solid rgba(127,255,110,0.25);}
+.tab[data-type="life"].active      { background: rgba(208,102,255,0.1);color: var(--accent-life);    border: 1px solid rgba(208,102,255,0.25);}
+.tab[data-type="travel"].active    { background: rgba(255,209,102,0.1);color: var(--accent-travel);  border: 1px solid rgba(255,209,102,0.25);}
+
+/* ── MAIN LAYOUT ─────────────────────────────────────────────────────────── */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 0 1.5rem 80px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── FORM CARD ───────────────────────────────────────────────────────────── */
+.form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.form-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.form-header-icon { font-size: 1.8rem; }
+.form-header-text h2 {
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem;
+}
+.form-header-text p { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+.form-body { padding: 24px 28px; }
+
+.section-title {
+  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px; margin-top: 24px;
+}
+.section-title:first-child { margin-top: 0; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+
+/* ── FORM CONTROLS ───────────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+
+.field input,
+.field select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--txt);
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  -webkit-appearance: none;
+}
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
+}
+.field select { cursor: pointer; }
+.field select option { background: #16161f; }
+
+.range-wrap { display: flex; flex-direction: column; gap: 6px; }
+.range-wrap input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px; outline: none;
+  border: none; box-shadow: none; padding: 0;
+}
+.range-wrap input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0,229,255,0.5);
+}
+.range-val {
+  display: flex; justify-content: space-between;
+  font-size: 0.75rem; color: var(--muted);
+}
+.range-display {
+  font-size: 0.9rem; color: var(--txt); font-weight: 500;
+  text-align: right;
+}
+
+.toggle-group { display: flex; gap: 8px; }
+.toggle-btn {
+  flex: 1; padding: 9px 6px; font-size: 0.82rem;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.toggle-btn.active {
+  background: rgba(0,229,255,0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── SUBMIT BUTTON ───────────────────────────────────────────────────────── */
+.predict-btn {
+  width: 100%; margin-top: 24px;
+  padding: 15px 24px;
+  border: none; border-radius: 12px;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent) 0%, #7fff6e 100%);
+  color: #09090f;
+  transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.predict-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,229,255,0.3); }
+.predict-btn:active { transform: translateY(0); }
+.predict-btn.loading { opacity: 0.7; pointer-events: none; }
+.predict-btn.loading::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid #09090f;
+  border-top-color: transparent;
+  transform: translate(-50%,-50%);
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────────────────── */
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── RESULT CARD ─────────────────────────────────────────────────────────── */
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  display: none;
+}
+.result-card.visible { display: block; animation: fadeUp 0.4s ease; }
+.result-label {
+  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px;
+}
+.result-amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.8rem; font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, #00e5ff, #7fff6e);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.result-period { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.result-divider {
+  height: 1px; background: var(--border);
+  margin: 18px 0;
+}
+.result-breakdown { display: flex; flex-direction: column; gap: 10px; }
+.breakdown-row {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.breakdown-key { font-size: 0.82rem; color: var(--muted); }
+.breakdown-val { font-size: 0.85rem; font-weight: 500; }
+.badge {
+  font-size: 0.7rem; padding: 3px 8px; border-radius: 50px;
+  font-weight: 600;
+}
+.badge-green { background: rgba(127,255,110,0.1); color: var(--accent-home); }
+.badge-yellow { background: rgba(255,209,102,0.1); color: var(--accent-travel); }
+.badge-red { background: rgba(255,80,80,0.1); color: #ff6b6b; }
+
+/* ── FACTORS CARD ────────────────────────────────────────────────────────── */
+.factors-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  display: none;
+}
+.factors-card.visible { display: block; animation: fadeUp 0.5s ease 0.1s both; }
+.factors-card h3 {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  margin-bottom: 16px;
+}
+.factor-row { margin-bottom: 12px; }
+.factor-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; color: var(--muted); margin-bottom: 5px;
+}
+.factor-label span:last-child { color: var(--txt); font-weight: 500; }
+.factor-bar {
+  height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;
+}
+.factor-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), #7fff6e);
+  transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ── MODEL METRICS CARD ──────────────────────────────────────────────────── */
+.metrics-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+}
+.metrics-card h3 {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  margin-bottom: 16px;
+}
+.metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.metric-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px;
+}
+.metric-item.full { grid-column: span 2; }
+.metric-val {
+  font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700;
+  color: var(--accent);
+}
+.metric-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+/* ── GAUGE ───────────────────────────────────────────────────────────────── */
+.gauge-wrap { display: flex; align-items: center; gap: 14px; }
+.gauge-svg { flex-shrink: 0; }
+.gauge-info { }
+.gauge-pct { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+.gauge-desc { font-size: 0.72rem; color: var(--muted); }
+
+/* ── TIPS CARD ───────────────────────────────────────────────────────────── */
+.tips-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  display: none;
+}
+.tips-card.visible { display: block; animation: fadeUp 0.6s ease 0.15s both; }
+.tips-card h3 {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  margin-bottom: 14px;
+}
+.tip-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.82rem; color: var(--muted);
+}
+.tip-item:last-child { border-bottom: none; }
+.tip-icon { flex-shrink: 0; font-size: 1rem; }
+
+/* ── FORMS SWITCHER ──────────────────────────────────────────────────────── */
+.insurance-form { display: none; }
+.insurance-form.active { display: block; }
+
+/* ── ANIMATIONS ──────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+  to { transform: translate(-50%,-50%) rotate(360deg); }
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .main { grid-template-columns: 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .span-2, .span-3 { grid-column: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">InsureAI</div>
+  <div style="display:flex;gap:4px;align-items:center;">
+    <a href="/" class="nav-link active">Predict</a>
+    <a href="/dashboard" class="nav-link">Dashboard</a>
+    <a href="/compare" class="nav-link">Compare</a>
+  </div>
+  <span class="nav-badge">Random Forest ML</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span>●</span> AI-Powered Predictions
+  </div>
+  <h1>Smart Insurance<br><span>Cost Predictor</span></h1>
+  <p class="hero-sub">Get instant, accurate insurance premium estimates across 5 categories using advanced machine learning.</p>
+</section>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" data-type="medical" onclick="switchTab('medical')">
+      <span class="tab-icon">🏥</span>
+      <span class="tab-label">Medical</span>
+    </button>
+    <button class="tab" data-type="car" onclick="switchTab('car')">
+      <span class="tab-icon">🚗</span>
+      <span class="tab-label">Car</span>
+    </button>
+    <button class="tab" data-type="home" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">Home</span>
+    </button>
+    <button class="tab" data-type="life" onclick="switchTab('life')">
+      <span class="tab-icon">💙</span>
+      <span class="tab-label">Life</span>
+    </button>
+    <button class="tab" data-type="travel" onclick="switchTab('travel')">
+      <span class="tab-icon">✈️</span>
+      <span class="tab-label">Travel</span>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT: FORMS -->
+  <div class="form-card">
+
+    <!-- ── MEDICAL FORM ── -->
+    <div id="form-medical" class="insurance-form active">
+      <div class="form-header">
+        <span class="form-header-icon">🏥</span>
+        <div class="form-header-text">
+          <h2>Medical Insurance</h2>
+          <p>Predict annual health insurance premium</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="section-title">Personal Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="m-age" min="1" max="100" value="35" placeholder="35">
+          </div>
+          <div class="field">
+            <label>Sex</label>
+            <select id="m-sex">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Height (cm)</label>
+            <input type="number" id="m-height" min="100" max="220" value="170">
+          </div>
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="m-weight" min="30" max="200" value="70">
+          </div>
+          <div class="field">
+            <label>Children / Dependents</label>
+            <input type="number" id="m-children" min="0" max="10" value="1">
+          </div>
+          <div class="field">
+            <label>Sleep Hours/Night</label>
+            <input type="number" id="m-sleep" min="3" max="12" value="7">
+          </div>
+        </div>
+
+        <div class="section-title">Lifestyle & Health</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Smoker</label>
+            <select id="m-smoker"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Alcohol Consumption</label>
+            <select id="m-alcohol">
+              <option value="none">None</option>
+              <option value="low">Low</option>
+              <option value="moderate">Moderate</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Exercise Level</label>
+            <select id="m-exercise">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Stress Level</label>
+            <select id="m-stress">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title">Medical Conditions</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Diabetes</label>
+            <select id="m-diabetes"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Blood Pressure</label>
+            <select id="m-bp">
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cholesterol</label>
+            <select id="m-cholesterol">
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Heart Disease</label>
+            <select id="m-heart"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Hospital Visits/yr</label>
+            <input type="number" id="m-hospital" min="0" max="20" value="1">
+          </div>
+          <div class="field">
+            <label>Claims History</label>
+            <input type="number" id="m-claims" min="0" max="10" value="0">
+          </div>
+        </div>
+
+        <div class="section-title">Demographics</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Occupation</label>
+            <select id="m-occupation">
+              <option value="office">Office</option>
+              <option value="labor">Labor</option>
+              <option value="risky">Risky</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Region</label>
+            <select id="m-region">
+              <option value="urban">Urban</option>
+              <option value="rural">Rural</option>
+              <option value="semi-urban">Semi-Urban</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pollution Level</label>
+            <select id="m-pollution">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Annual Income (₹)</label>
+            <input type="number" id="m-income" min="100000" max="10000000" value="600000">
+          </div>
+          <div class="field span-2">
+            <label>BMI</label>
+            <input type="number" id="m-bmi" step="0.01" min="10" max="60" value="22.5">
+          </div>
+        </div>
+        <button class="predict-btn" onclick="predict('medical')">Calculate Premium →</button>
+      </div>
+    </div>
+
+    <!-- ── CAR FORM ── -->
+    <div id="form-car" class="insurance-form">
+      <div class="form-header">
+        <span class="form-header-icon">🚗</span>
+        <div class="form-header-text">
+          <h2>Car Insurance</h2>
+          <p>Predict annual auto insurance premium</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="section-title">Driver Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="c-age" min="18" max="75" value="30">
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select id="c-gender"><option value="male">Male</option><option value="female">Female</option></select>
+          </div>
+          <div class="field">
+            <label>License Years</label>
+            <input type="number" id="c-license" min="0" max="50" value="8">
+          </div>
+          <div class="field">
+            <label>Credit Score</label>
+            <input type="number" id="c-credit" min="300" max="850" value="700">
+          </div>
+        </div>
+        <div class="section-title">Vehicle Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Vehicle Type</label>
+            <select id="c-vtype">
+              <option value="sedan">Sedan</option>
+              <option value="suv">SUV</option>
+              <option value="hatchback">Hatchback</option>
+              <option value="truck">Truck</option>
+              <option value="sports">Sports</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Vehicle Age (years)</label>
+            <input type="number" id="c-vage" min="0" max="20" value="3">
+          </div>
+          <div class="field">
+            <label>Annual Mileage (km)</label>
+            <input type="number" id="c-mileage" min="1000" max="100000" value="15000">
+          </div>
+          <div class="field">
+            <label>City Type</label>
+            <select id="c-city">
+              <option value="urban">Urban</option>
+              <option value="suburban">Suburban</option>
+              <option value="rural">Rural</option>
+            </select>
+          </div>
+        </div>
+        <div class="section-title">History & Safety</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Accidents (past 5 yrs)</label>
+            <input type="number" id="c-accidents" min="0" max="10" value="0">
+          </div>
+          <div class="field">
+            <label>Traffic Violations</label>
+            <input type="number" id="c-violations" min="0" max="15" value="0">
+          </div>
+          <div class="field">
+            <label>Anti-Theft Device</label>
+            <select id="c-antitheft"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+          <div class="field">
+            <label>Multi-Car Policy</label>
+            <select id="c-multicar"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+        </div>
+        <button class="predict-btn" onclick="predict('car')" style="background:linear-gradient(135deg,#ff6b35,#ffd166)">Calculate Premium →</button>
+      </div>
+    </div>
+
+    <!-- ── HOME FORM ── -->
+    <div id="form-home" class="insurance-form">
+      <div class="form-header">
+        <span class="form-header-icon">🏠</span>
+        <div class="form-header-text">
+          <h2>Home Insurance</h2>
+          <p>Predict annual homeowners insurance premium</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="section-title">Property Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Home Value (₹)</label>
+            <input type="number" id="h-value" min="500000" max="50000000" value="4000000">
+          </div>
+          <div class="field">
+            <label>Area (sq. ft.)</label>
+            <input type="number" id="h-sqft" min="300" max="10000" value="1500">
+          </div>
+          <div class="field">
+            <label>Home Age (years)</label>
+            <input type="number" id="h-age" min="0" max="100" value="10">
+          </div>
+          <div class="field">
+            <label>Roof Age (years)</label>
+            <input type="number" id="h-roof" min="0" max="50" value="5">
+          </div>
+        </div>
+        <div class="section-title">Location & Construction</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Location Risk</label>
+            <select id="h-location">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Construction Type</label>
+            <select id="h-construction">
+              <option value="brick">Brick</option>
+              <option value="concrete">Concrete</option>
+              <option value="wood">Wood</option>
+              <option value="steel">Steel</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Flood Zone?</label>
+            <select id="h-flood"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Owner Age</label>
+            <input type="number" id="h-ownerage" min="22" max="80" value="40">
+          </div>
+        </div>
+        <div class="section-title">Safety & History</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Security System</label>
+            <select id="h-security"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+          <div class="field">
+            <label>Smoke Detectors</label>
+            <select id="h-smoke"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+          <div class="field">
+            <label>Claims History</label>
+            <input type="number" id="h-claims" min="0" max="10" value="0">
+          </div>
+          <div class="field">
+            <label>Garage</label>
+            <select id="h-garage"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+        </div>
+        <button class="predict-btn" onclick="predict('home')" style="background:linear-gradient(135deg,#7fff6e,#00e5ff)">Calculate Premium →</button>
+      </div>
+    </div>
+
+    <!-- ── LIFE FORM ── -->
+    <div id="form-life" class="insurance-form">
+      <div class="form-header">
+        <span class="form-header-icon">💙</span>
+        <div class="form-header-text">
+          <h2>Life Insurance</h2>
+          <p>Predict annual life insurance premium</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="section-title">Personal Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="l-age" min="18" max="70" value="32">
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select id="l-gender"><option value="male">Male</option><option value="female">Female</option></select>
+          </div>
+          <div class="field">
+            <label>BMI</label>
+            <input type="number" id="l-bmi" step="0.1" min="15" max="50" value="23">
+          </div>
+          <div class="field">
+            <label>Annual Income (₹)</label>
+            <input type="number" id="l-income" min="100000" max="20000000" value="800000">
+          </div>
+        </div>
+        <div class="section-title">Policy Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Coverage Amount (₹)</label>
+            <input type="number" id="l-coverage" min="100000" max="10000000" value="2000000">
+          </div>
+          <div class="field">
+            <label>Policy Term (years)</label>
+            <select id="l-term">
+              <option value="10">10 Years</option>
+              <option value="15">15 Years</option>
+              <option value="20">20 Years</option>
+              <option value="25">25 Years</option>
+              <option value="30">30 Years</option>
+            </select>
+          </div>
+        </div>
+        <div class="section-title">Health & Lifestyle</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Smoker</label>
+            <select id="l-smoker"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Alcohol</label>
+            <select id="l-alcohol">
+              <option value="none">None</option>
+              <option value="moderate">Moderate</option>
+              <option value="heavy">Heavy</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Exercise Frequency</label>
+            <select id="l-exercise">
+              <option value="none">None</option>
+              <option value="light">Light</option>
+              <option value="moderate">Moderate</option>
+              <option value="intense">Intense</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Occupation Risk</label>
+            <select id="l-occup">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Family History</label>
+            <select id="l-family"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Chronic Illness</label>
+            <select id="l-chronic"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+        </div>
+        <button class="predict-btn" onclick="predict('life')" style="background:linear-gradient(135deg,#d066ff,#7fff6e)">Calculate Premium →</button>
+      </div>
+    </div>
+
+    <!-- ── TRAVEL FORM ── -->
+    <div id="form-travel" class="insurance-form">
+      <div class="form-header">
+        <span class="form-header-icon">✈️</span>
+        <div class="form-header-text">
+          <h2>Travel Insurance</h2>
+          <p>Predict trip insurance premium</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="section-title">Traveler & Trip Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="t-age" min="18" max="80" value="28">
+          </div>
+          <div class="field">
+            <label>Number of Travelers</label>
+            <input type="number" id="t-travelers" min="1" max="10" value="2">
+          </div>
+          <div class="field">
+            <label>Trip Duration (days)</label>
+            <input type="number" id="t-duration" min="1" max="90" value="10">
+          </div>
+          <div class="field">
+            <label>Trip Cost (₹)</label>
+            <input type="number" id="t-cost" min="5000" max="1000000" value="80000">
+          </div>
+          <div class="field">
+            <label>Destination Risk</label>
+            <select id="t-destination">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="extreme">Extreme</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Travel Purpose</label>
+            <select id="t-purpose">
+              <option value="leisure">Leisure</option>
+              <option value="business">Business</option>
+              <option value="adventure">Adventure</option>
+              <option value="medical">Medical</option>
+            </select>
+          </div>
+        </div>
+        <div class="section-title">Coverage Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Coverage Type</label>
+            <select id="t-coverage">
+              <option value="basic">Basic</option>
+              <option value="standard">Standard</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Medical Coverage (₹)</label>
+            <input type="number" id="t-medical" min="50000" max="5000000" value="500000">
+          </div>
+          <div class="field">
+            <label>Baggage Coverage (₹)</label>
+            <input type="number" id="t-baggage" min="5000" max="200000" value="30000">
+          </div>
+          <div class="field">
+            <label>Pre-existing Condition</label>
+            <select id="t-preexisting"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+          <div class="field">
+            <label>Flight Delay Cover</label>
+            <select id="t-delay"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+          <div class="field">
+            <label>Adventure Sports</label>
+            <select id="t-sports"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+        </div>
+        <button class="predict-btn" onclick="predict('travel')" style="background:linear-gradient(135deg,#ffd166,#ff6b35)">Calculate Premium →</button>
+      </div>
+    </div>
+
+  </div><!-- /form-card -->
+
+  <!-- RIGHT: SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- RESULT -->
+    <div class="result-card" id="result-card">
+      <div class="result-label">Estimated Annual Premium</div>
+      <div class="result-amount" id="result-amount">₹0</div>
+      <div class="result-period">per year · AI prediction</div>
+      <div class="result-divider"></div>
+      <div class="result-breakdown">
+        <div class="breakdown-row">
+          <span class="breakdown-key">Monthly equivalent</span>
+          <span class="breakdown-val" id="monthly-val">—</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-key">Risk level</span>
+          <span class="breakdown-val" id="risk-badge"></span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-key">Percentile vs market</span>
+          <span class="breakdown-val" id="pct-val">—</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-key">Model confidence</span>
+          <span class="breakdown-val" id="conf-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP FACTORS -->
+    <div class="factors-card" id="factors-card">
+      <h3>Top Cost Drivers</h3>
+      <div id="factors-list"></div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="tips-card" id="tips-card">
+      <h3>💡 Ways to Lower Your Premium</h3>
+      <div id="tips-list"></div>
+    </div>
+
+    <!-- MODEL METRICS -->
+    <div class="metrics-card">
+      <h3>Model Performance</h3>
+      <div class="metrics-grid">
+        <div class="metric-item full">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" width="60" height="60" viewBox="0 0 60 60">
+              <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+              <circle cx="30" cy="30" r="24" fill="none" stroke="var(--accent)" stroke-width="6"
+                stroke-dasharray="150.8" stroke-dashoffset="18" stroke-linecap="round"
+                transform="rotate(-90 30 30)" id="gauge-circle"/>
+            </svg>
+            <div class="gauge-info">
+              <div class="gauge-pct" id="r2-display">—</div>
+              <div class="gauge-desc">R² Score (Accuracy)</div>
+            </div>
+          </div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val" id="mae-display">—</div>
+          <div class="metric-lbl">Mean Abs. Error (₹)</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-val" id="rmse-display">—</div>
+          <div class="metric-lbl">RMSE (₹)</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+</div><!-- /main -->
+
+<script>
+let currentType = 'medical';
+
+const TIPS = {
+  medical: [
+    {icon:'🚭', text:'Quit smoking — smokers pay 2-4x more in premiums'},
+    {icon:'🏃', text:'Regular exercise can significantly reduce your health risk'},
+    {icon:'⚖️', text:'Maintain a healthy BMI between 18.5 and 24.9'},
+    {icon:'😴', text:'Getting 7-8 hours of sleep reduces chronic illness risk'},
+  ],
+  car: [
+    {icon:'🛡️', text:'Install an anti-theft device for instant discounts'},
+    {icon:'📍', text:'Move to a suburban area to reduce risk rating'},
+    {icon:'🚦', text:'Maintain a clean traffic record for lower premiums'},
+    {icon:'🔑', text:'Bundle multiple vehicles for multi-car discounts'},
+  ],
+  home: [
+    {icon:'🔒', text:'Install a security system for 5-15% discount'},
+    {icon:'🔥', text:'Smoke detectors and fire alarms lower premiums'},
+    {icon:'🏗️', text:'Brick/concrete construction is cheaper to insure than wood'},
+    {icon:'🛖', text:'A new roof significantly lowers structural risk'},
+  ],
+  life: [
+    {icon:'🚭', text:'Non-smokers get premiums 50-70% lower than smokers'},
+    {icon:'💪', text:'Regular exercise improves health ratings'},
+    {icon:'📋', text:'Get checked and manage chronic conditions proactively'},
+    {icon:'📅', text:'Buy at a younger age to lock in lower lifetime rates'},
+  ],
+  travel: [
+    {icon:'📅', text:'Book early — premiums rise closer to departure'},
+    {icon:'🌍', text:'Choose lower-risk destinations when possible'},
+    {icon:'👥', text:'Group travel policies often offer better rates'},
+    {icon:'📋', text:'Declare all pre-existing conditions to avoid claim denial'},
+  ],
+};
+
+function switchTab(type) {
+  currentType = type;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
+  document.querySelectorAll('.insurance-form').forEach(f => f.classList.toggle('active', f.id === 'form-' + type));
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('factors-card').classList.remove('visible');
+  document.getElementById('tips-card').classList.remove('visible');
+
+  // set accent
+  const accents = {
+    medical:'#00e5ff', car:'#ff6b35', home:'#7fff6e', life:'#d066ff', travel:'#ffd166'
+  };
+  document.documentElement.style.setProperty('--accent', accents[type]);
+  loadMetrics(type);
+}
+
+async function loadMetrics(type) {
+  try {
+    const r = await fetch(`/api/metrics/${type}`);
+    const d = await r.json();
+    updateMetrics(d);
+  } catch(e) {}
+}
+
+function updateMetrics(m) {
+  document.getElementById('r2-display').textContent = (m.r2 * 100).toFixed(1) + '%';
+  document.getElementById('mae-display').textContent = '₹' + m.mae.toLocaleString('en-IN');
+  document.getElementById('rmse-display').textContent = '₹' + m.rmse.toLocaleString('en-IN');
+  // gauge
+  const pct = m.r2;
+  const circumference = 150.8;
+  const offset = circumference - pct * circumference;
+  document.getElementById('gauge-circle').setAttribute('stroke-dashoffset', offset.toFixed(1));
+}
+
+function collectData(type) {
+  const g = id => document.getElementById(id)?.value;
+  const maps = {
+    medical: {
+      age: g('m-age'), sex: g('m-sex'), height: g('m-height'), weight: g('m-weight'),
+      children: g('m-children'), smoker: g('m-smoker'), alcohol: g('m-alcohol'),
+      exercise: g('m-exercise'), diabetes: g('m-diabetes'), bp: g('m-bp'),
+      cholesterol: g('m-cholesterol'), heart_disease: g('m-heart'),
+      stress_level: g('m-stress'), sleep_hours: g('m-sleep'),
+      occupation: g('m-occupation'), income: g('m-income'), region: g('m-region'),
+      pollution_level: g('m-pollution'), claims: g('m-claims'),
+      hospital_visits: g('m-hospital'), bmi: g('m-bmi')
+    },
+    car: {
+      age: g('c-age'), gender: g('c-gender'), vehicle_age: g('c-vage'),
+      vehicle_type: g('c-vtype'), annual_mileage: g('c-mileage'),
+      accidents_history: g('c-accidents'), traffic_violations: g('c-violations'),
+      license_years: g('c-license'), city_type: g('c-city'),
+      credit_score: g('c-credit'), anti_theft: g('c-antitheft'), multi_car: g('c-multicar')
+    },
+    home: {
+      home_age: g('h-age'), home_value: g('h-value'), square_feet: g('h-sqft'),
+      location_risk: g('h-location'), construction_type: g('h-construction'),
+      security_system: g('h-security'), smoke_detectors: g('h-smoke'),
+      flood_zone: g('h-flood'), roof_age: g('h-roof'), owner_age: g('h-ownerage'),
+      claims_history: g('h-claims'), garage: g('h-garage')
+    },
+    life: {
+      age: g('l-age'), gender: g('l-gender'), bmi: g('l-bmi'), smoker: g('l-smoker'),
+      occupation_risk: g('l-occup'), coverage_amount: g('l-coverage'),
+      policy_term: g('l-term'), family_history: g('l-family'),
+      chronic_illness: g('l-chronic'), alcohol: g('l-alcohol'),
+      exercise_freq: g('l-exercise'), annual_income: g('l-income')
+    },
+    travel: {
+      age: g('t-age'), trip_duration: g('t-duration'), destination_risk: g('t-destination'),
+      trip_cost: g('t-cost'), num_travelers: g('t-travelers'), travel_purpose: g('t-purpose'),
+      pre_existing_condition: g('t-preexisting'), coverage_type: g('t-coverage'),
+      medical_coverage: g('t-medical'), baggage_coverage: g('t-baggage'),
+      flight_delay: g('t-delay'), adventure_sports: g('t-sports')
+    }
+  };
+  return maps[type];
+}
+
+async function predict(type) {
+  const btn = document.querySelector(`#form-${type} .predict-btn`);
+  btn.classList.add('loading');
+  btn.textContent = '';
+
+  try {
+    const payload = collectData(type);
+    const resp = await fetch(`/api/predict/${type}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    const amt = data.premium;
+
+    // result card
+    const rc = document.getElementById('result-card');
+    rc.classList.add('visible');
+    document.getElementById('result-amount').textContent = '₹' + Math.round(amt).toLocaleString('en-IN');
+    document.getElementById('monthly-val').textContent = '₹' + Math.round(amt/12).toLocaleString('en-IN');
+
+    // risk badge
+    let riskHtml, riskClass;
+    if (amt < 10000)       { riskHtml='Low Risk'; riskClass='badge-green'; }
+    else if (amt < 40000)  { riskHtml='Medium Risk'; riskClass='badge-yellow'; }
+    else                   { riskHtml='High Risk'; riskClass='badge-red'; }
+    document.getElementById('risk-badge').innerHTML = `<span class="badge ${riskClass}">${riskHtml}</span>`;
+    document.getElementById('conf-val').textContent = (data.metrics.r2 * 100).toFixed(1) + '%';
+    document.getElementById('pct-val').textContent = data.percentile + 'th percentile';
+
+    // factors
+    const fc = document.getElementById('factors-card');
+    fc.classList.add('visible');
+    const maxImp = data.top_factors[0].importance;
+    document.getElementById('factors-list').innerHTML = data.top_factors.map(f => `
+      <div class="factor-row">
+        <div class="factor-label">
+          <span>${f.feature}</span>
+          <span>${f.importance.toFixed(1)}%</span>
+        </div>
+        <div class="factor-bar">
+          <div class="factor-fill" style="width:${(f.importance/maxImp*100).toFixed(0)}%"></div>
+        </div>
+      </div>
+    `).join('');
+
+    // tips
+    const tc = document.getElementById('tips-card');
+    tc.classList.add('visible');
+    document.getElementById('tips-list').innerHTML = (TIPS[type]||[]).map(t =>
+      `<div class="tip-item"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`
+    ).join('');
+
+    // metrics
+    updateMetrics(data.metrics);
+
+  } catch(e) {
+    alert('Prediction failed: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = 'Calculate Premium →';
+  }
+}
+
+// init metrics on load
+loadMetrics('medical');
+</script>
+</body>
+</html>

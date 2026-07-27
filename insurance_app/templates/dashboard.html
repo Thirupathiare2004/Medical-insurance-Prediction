@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — InsureAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#09090f; --surface:#111118; --card:#16161f; --border:rgba(255,255,255,0.07);
+  --txt:#e8e8f0; --muted:#6b6b80; --accent:#00e5ff;
+  --c-med:#00e5ff; --c-car:#ff6b35; --c-home:#7fff6e; --c-life:#d066ff; --c-travel:#ffd166;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;background:rgba(9,9,15,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;background:linear-gradient(135deg,#00e5ff,#7fff6e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-link{font-size:0.82rem;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:8px;transition:all 0.2s;font-weight:500}
+.nav-link:hover,.nav-link.active{color:var(--txt);background:rgba(255,255,255,0.06)}
+.nav-badge{font-size:0.7rem;color:var(--muted);border:1px solid var(--border);padding:4px 10px;border-radius:50px}
+
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 1.5rem 80px}
+.page-header{margin-bottom:40px}
+.page-header h1{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-1px}
+.page-header p{color:var(--muted);margin-top:6px}
+
+/* stats row */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;animation:fadeUp 0.5s ease both}
+.stat-card::before{content:'';position:absolute;inset:0;opacity:0.04;background:var(--c)}
+.stat-icon{font-size:1.6rem;margin-bottom:10px}
+.stat-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--c)}
+.stat-sub{font-size:0.72rem;color:var(--muted);margin-top:3px}
+
+/* chart grid */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;animation:fadeUp 0.5s ease 0.1s both}
+.chart-card.full{grid-column:span 2}
+.chart-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;margin-bottom:4px}
+.chart-sub{font-size:0.75rem;color:var(--muted);margin-bottom:20px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap.tall{height:280px}
+
+/* accuracy table */
+.acc-table{width:100%;border-collapse:collapse;font-size:0.84rem}
+.acc-table th{text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--border)}
+.acc-table td{padding:12px 14px;border-bottom:1px solid var(--border)}
+.acc-table tr:last-child td{border-bottom:none}
+.acc-table tr:hover td{background:rgba(255,255,255,0.02)}
+.r2-bar{display:flex;align-items:center;gap:10px}
+.r2-track{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.r2-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),#7fff6e)}
+
+/* history */
+.history-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;animation:fadeUp 0.5s ease 0.2s both}
+.history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.history-header h2{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700}
+.clear-btn{font-size:0.78rem;color:var(--muted);border:1px solid var(--border);background:transparent;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.clear-btn:hover{color:var(--txt);border-color:rgba(255,255,255,0.2)}
+.history-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.88rem}
+.history-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);animation:fadeUp 0.3s ease both}
+.history-item:last-child{border-bottom:none}
+.h-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.h-info{flex:1}
+.h-type{font-weight:600;font-size:0.88rem}
+.h-time{font-size:0.75rem;color:var(--muted);margin-top:2px}
+.h-amount{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700}
+.predict-btn-sm{font-size:0.75rem;padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;text-decoration:none;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.predict-btn-sm:hover{color:var(--txt);border-color:rgba(255,255,255,0.25)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">InsureAI</div>
+  <div style="display:flex;gap:4px">
+    <a href="/" class="nav-link">Predict</a>
+    <a href="/dashboard" class="nav-link active">Dashboard</a>
+    <a href="/compare" class="nav-link">Compare</a>
+  </div>
+  <span class="nav-badge">Analytics</span>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Analytics Dashboard</h1>
+    <p>Model performance, dataset statistics & your prediction history</p>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card" style="--c:var(--c-med);animation-delay:0s"><div class="stat-icon">🏥</div><div class="stat-label">Medical R²</div><div class="stat-val" id="s-med">—</div><div class="stat-sub">Random Forest</div></div>
+    <div class="stat-card" style="--c:var(--c-car);animation-delay:0.05s"><div class="stat-icon">🚗</div><div class="stat-label">Car R²</div><div class="stat-val" id="s-car">—</div><div class="stat-sub">Random Forest</div></div>
+    <div class="stat-card" style="--c:var(--c-home);animation-delay:0.1s"><div class="stat-icon">🏠</div><div class="stat-label">Home R²</div><div class="stat-val" id="s-home">—</div><div class="stat-sub">Random Forest</div></div>
+    <div class="stat-card" style="--c:var(--c-life);animation-delay:0.15s"><div class="stat-icon">💙</div><div class="stat-label">Life R²</div><div class="stat-val" id="s-life">—</div><div class="stat-sub">Random Forest</div></div>
+    <div class="stat-card" style="--c:var(--c-travel);animation-delay:0.2s"><div class="stat-icon">✈️</div><div class="stat-label">Travel R²</div><div class="stat-val" id="s-travel">—</div><div class="stat-sub">Random Forest</div></div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Model Accuracy Comparison</div>
+      <div class="chart-sub">R² Score across all insurance types</div>
+      <div class="chart-wrap"><canvas id="accuracyChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Error Metrics (MAE)</div>
+      <div class="chart-sub">Mean Absolute Error per model (₹)</div>
+      <div class="chart-wrap"><canvas id="maeChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="chart-grid" style="margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">Premium Distribution</div>
+      <div class="chart-sub">
+        Select: 
+        <select id="dist-select" onchange="loadDistribution()" style="background:#16161f;border:1px solid rgba(255,255,255,0.07);color:#e8e8f0;padding:3px 8px;border-radius:6px;font-size:0.78rem;cursor:pointer">
+          <option value="medical">Medical</option>
+          <option value="car">Car</option>
+          <option value="home">Home</option>
+          <option value="life">Life</option>
+          <option value="travel">Travel</option>
+        </select>
+      </div>
+      <div class="chart-wrap"><canvas id="distChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">RMSE vs MAE Comparison</div>
+      <div class="chart-sub">Error spread per insurance model</div>
+      <div class="chart-wrap"><canvas id="rmseChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ACCURACY TABLE -->
+  <div class="chart-card full" style="margin-bottom:24px;animation:fadeUp 0.5s ease 0.15s both;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px">
+    <div class="chart-title">Model Performance Summary</div>
+    <div class="chart-sub" style="margin-bottom:16px">Detailed metrics for all Random Forest models (5,000 records each)</div>
+    <table class="acc-table" id="acc-table"><thead><tr><th>Model</th><th>R² Score</th><th>MAE (₹)</th><th>RMSE (₹)</th><th>Accuracy Bar</th></tr></thead><tbody id="acc-tbody"></tbody></table>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section">
+    <div class="history-header">
+      <h2>📋 Prediction History <span id="hist-count" style="font-size:0.78rem;color:var(--muted);font-weight:400;margin-left:8px"></span></h2>
+      <button class="clear-btn" onclick="clearHistory()">Clear All</button>
+    </div>
+    <div id="history-list"><div class="history-empty">No predictions yet. <a href="/" style="color:var(--accent)">Make your first prediction →</a></div></div>
+  </div>
+</div>
+
+<script>
+const COLORS = {medical:'#00e5ff',car:'#ff6b35',home:'#7fff6e',life:'#d066ff',travel:'#ffd166'};
+const TYPES  = ['medical','car','home','life','travel'];
+const LABELS = ['Medical','Car','Home','Life','Travel'];
+
+const chartDefaults = {
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#16161f',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#e8e8f0',bodyColor:'#6b6b80',padding:12}},
+  scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b6b80',font:{size:11}}},
+          y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b6b80',font:{size:11}}}}
+};
+
+let allMetrics = {};
+let accuracyChart, maeChart, distChart, rmseChart;
+
+async function init() {
+  const r = await fetch('/api/all_metrics');
+  allMetrics = await r.json();
+
+  // stat cards
+  TYPES.forEach(t => {
+    const el = document.getElementById('s-'+t);
+    if(el) el.textContent = (allMetrics[t].r2*100).toFixed(1)+'%';
+  });
+
+  buildAccuracyChart();
+  buildMAEChart();
+  buildRMSEChart();
+  buildAccTable();
+  loadDistribution();
+  loadHistory();
+}
+
+function buildAccuracyChart() {
+  const ctx = document.getElementById('accuracyChart').getContext('2d');
+  accuracyChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: LABELS,
+      datasets:[{
+        data: TYPES.map(t => +(allMetrics[t].r2*100).toFixed(2)),
+        backgroundColor: TYPES.map(t => COLORS[t]+'33'),
+        borderColor: TYPES.map(t => COLORS[t]),
+        borderWidth:2, borderRadius:8,
+      }]
+    },
+    options:{
+      ...chartDefaults,
+      plugins:{...chartDefaults.plugins},
+      scales:{...chartDefaults.scales, y:{...chartDefaults.scales.y, min:80, max:100, ticks:{...chartDefaults.scales.y.ticks, callback:v=>v+'%'}}}
+    }
+  });
+}
+
+function buildMAEChart() {
+  const ctx = document.getElementById('maeChart').getContext('2d');
+  maeChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:LABELS,
+      datasets:[{
+        data: TYPES.map(t => allMetrics[t].mae),
+        backgroundColor: TYPES.map(t=>COLORS[t]+'33'),
+        borderColor: TYPES.map(t=>COLORS[t]),
+        borderWidth:2, borderRadius:8,
+      }]
+    },
+    options:{...chartDefaults}
+  });
+}
+
+function buildRMSEChart() {
+  const ctx = document.getElementById('rmseChart').getContext('2d');
+  rmseChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:LABELS,
+      datasets:[
+        {label:'MAE', data:TYPES.map(t=>allMetrics[t].mae), backgroundColor:'rgba(0,229,255,0.2)', borderColor:'#00e5ff', borderWidth:2, borderRadius:6},
+        {label:'RMSE',data:TYPES.map(t=>allMetrics[t].rmse),backgroundColor:'rgba(208,102,255,0.2)',borderColor:'#d066ff',borderWidth:2, borderRadius:6}
+      ]
+    },
+    options:{
+      ...chartDefaults,
+      plugins:{...chartDefaults.plugins, legend:{display:true,labels:{color:'#6b6b80',font:{size:11}}}}
+    }
+  });
+}
+
+async function loadDistribution() {
+  const type = document.getElementById('dist-select').value;
+  const r = await fetch(`/api/dataset_stats/${type}`);
+  const d = await r.json();
+  const ctx = document.getElementById('distChart').getContext('2d');
+  if(distChart) distChart.destroy();
+  const color = COLORS[type];
+  const midLabels = d.histogram.edges.slice(0,-1).map((e,i)=>
+    '₹'+(((e+d.histogram.edges[i+1])/2)/1000).toFixed(0)+'k'
+  );
+  distChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:midLabels,
+      datasets:[{
+        data:d.histogram.counts,
+        backgroundColor:color+'33', borderColor:color, borderWidth:2, borderRadius:4
+      }]
+    },
+    options:{...chartDefaults, plugins:{...chartDefaults.plugins, tooltip:{...chartDefaults.plugins.tooltip, callbacks:{label:ctx=>`${ctx.parsed.y} policies`}}}}
+  });
+}
+
+function buildAccTable() {
+  const tbody = document.getElementById('acc-tbody');
+  const icons = {medical:'🏥',car:'🚗',home:'🏠',life:'💙',travel:'✈️'};
+  tbody.innerHTML = TYPES.map(t => {
+    const m = allMetrics[t];
+    const pct = (m.r2*100).toFixed(1);
+    return `<tr>
+      <td><span style="margin-right:8px">${icons[t]}</span><strong>${t.charAt(0).toUpperCase()+t.slice(1)}</strong></td>
+      <td style="color:${COLORS[t]};font-weight:700">${pct}%</td>
+      <td>₹${m.mae.toLocaleString('en-IN')}</td>
+      <td>₹${m.rmse.toLocaleString('en-IN')}</td>
+      <td style="min-width:160px"><div class="r2-bar"><div class="r2-track"><div class="r2-fill" style="width:${pct}%;background:${COLORS[t]}"></div></div><span style="font-size:0.78rem;color:var(--muted)">${pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadHistory() {
+  const r = await fetch('/api/history');
+  const hist = await r.json();
+  const el = document.getElementById('history-list');
+  document.getElementById('hist-count').textContent = hist.length ? `(${hist.length})` : '';
+  if(!hist.length){
+    el.innerHTML = '<div class="history-empty">No predictions yet. <a href="/" style="color:var(--accent)">Make your first prediction →</a></div>';
+    return;
+  }
+  el.innerHTML = [...hist].reverse().map((h,i)=>`
+    <div class="history-item" style="animation-delay:${i*0.05}s">
+      <div class="h-icon" style="background:${COLORS[h.type]}22">${h.icon}</div>
+      <div class="h-info">
+        <div class="h-type">${h.label} Insurance</div>
+        <div class="h-time">${h.time}</div>
+      </div>
+      <div class="h-amount" style="color:${COLORS[h.type]}">₹${Math.round(h.premium).toLocaleString('en-IN')}</div>
+      <a href="/" class="predict-btn-sm">Predict Again</a>
+    </div>
+  `).join('');
+}
+
+async function clearHistory() {
+  await fetch('/api/history/clear', {method:'POST'});
+  loadHistory();
+}
+
+init();
+</script>
+</body>
+</html>
